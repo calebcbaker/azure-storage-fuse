@@ -9,15 +9,15 @@ int main(int argc, char *argv[])
     stdErrFD = dup(2);
 
     static struct fuse_operations azs_blob_operations;
-    set_up_callbacks(azs_blob_operations);
-
     struct fuse_args args;
+    
     int ret = read_and_set_arguments(argc, argv, &args);
     if (ret != 0)
     {
         return ret;
     }
 
+    set_up_callbacks(azs_blob_operations);
     configure_fuse(&args);
 
     if (libcurl_version < blobfuse_constants::minCurlVersion) {

@@ -89,6 +89,8 @@ struct configParams
     uint64_t readStreamBufferSize;
     int maxBlocksPerFile;
     uint64_t blockSize;
+
+    bool useGen1;
 };
 
 // FUSE contains a specific type of command-line option parsing; here we are just following the pattern.
@@ -131,6 +133,7 @@ struct cmdlineOptions
     const char *stream_buffer; // Stream buffer max size
     const char *max_blocks_per_file; // Number of blocks to be cached per file in case of streaming
     const char *block_size_mb; // Size of each block to be downloaded during streaming
+    const char *use_gen1; // Whether to use gen1 overriding or not
 };
 
 

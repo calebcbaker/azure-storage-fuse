@@ -27,9 +27,12 @@ set (BLOBFUSE_HEADER
   blobfuse/include/AttrCacheBfsClient.h
   blobfuse/include/AttrCacheWrapper.h
   blobfuse/include/BlobStreamer.h
+  blobfuse/include/BlobStreamer.h
 
   blobfuse/include/OAuthToken.h
   blobfuse/include/OAuthTokenCredentialManager.h
+
+  fuse_forwarder/forwarder.h
 )
 
 set (BLOBFUSE_SOURCE
@@ -93,7 +96,7 @@ if(UNIX)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_THREAD_LIBS_INIT} ${WARNING} ${CMAKE_CXX_FLAGS}")
 
-  include_directories(${CMAKE_SOURCE_DIR}/blobfuse ${CMAKE_SOURCE_DIR}/blobfuse/include ${CMAKE_SOURCE_DIR}/cpplite/include ${CMAKE_SOURCE_DIR}/cpplite/adls/include ${CURL_INCLUDE_DIRS} ${GNUTLS_INCLUDE_DIR} ${Boost_INCLUDE_DIR} nlohmann-json)
+  include_directories(${CMAKE_SOURCE_DIR}/blobfuse ${CMAKE_SOURCE_DIR}/blobfuse/include ${CMAKE_SOURCE_DIR}/fuse_forwarder ${CMAKE_SOURCE_DIR}/cpplite/include ${CMAKE_SOURCE_DIR}/cpplite/adls/include ${CURL_INCLUDE_DIRS} ${GNUTLS_INCLUDE_DIR} ${Boost_INCLUDE_DIR} nlohmann-json)
   set(CMAKE_MACOSX_RPATH ON)
   pkg_search_module(UUID REQUIRED uuid)
   

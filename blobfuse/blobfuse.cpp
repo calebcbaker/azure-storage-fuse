@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <forwarder.h>
 
 #include <include/StorageBfsClientBase.h>
 #include <include/BlockBlobBfsClient.h>
@@ -74,6 +75,7 @@ const struct fuse_opt option_spec[] =
     OPTION("--stream-cache-mb=%s", stream_buffer),
     OPTION("--max-blocks-per-file=%s", max_blocks_per_file),
     OPTION("--block-size-mb=%s", block_size_mb),
+    OPTION("--use-gen1=%s", use_gen1),
 
     OPTION("--version", version),
     OPTION("-v", version),
@@ -399,29 +401,8 @@ void destroyBlobfuseOnAuthError()
 }
 
 int configure_tls();
-void *azs_init(struct fuse_conn_info * conn)
+void *validate_storage()
 {
-    syslog(LOG_DEBUG, "azs_init ran");
-
-    gMountTime = time(NULL);
-    /*
-    cfg->attr_timeout = 360;
-    cfg->kernel_cache = 1;
-    cfg->entry_timeout = 120;
-    cfg->negative_timeout = 120;
-    */
-   // even 4.18 does not like this so 5.4 is not enough so 
-    if (kernel_version < blobfuse_constants::minKernelVersion) {
-        conn->max_write = 4194304;
-	// let fuselib pick 128KB
-	//conn->max_read = 4194304;
-    } else {
-        conn->want |= FUSE_CAP_BIG_WRITES;
-    }
-    conn->max_readahead = 4194304;
-    conn->max_background = 128;
-    //  conn->want |= FUSE_CAP_WRITEBACK_CACHE | FUSE_CAP_EXPORT_SUPPORT; // TODO: Investigate putting this back in when we downgrade to fuse 2.9
-
     g_gc_cache = std::make_shared<gc_cache>(config_options.tmpPath, config_options.fileCacheTimeoutInSeconds);
     g_gc_cache->run();
     
@@ -482,6 +463,37 @@ void *azs_init(struct fuse_conn_info * conn)
                             config_options.readStreamBufferSize, 
                             config_options.maxBlocksPerFile,
                             config_options.blockSize);
+    }
+
+    return NULL;
+}
+
+
+void *azs_init(struct fuse_conn_info * conn)
+{
+    syslog(LOG_DEBUG, "azs_init ran");
+
+    gMountTime = time(NULL);
+    /*
+    cfg->attr_timeout = 360;
+    cfg->kernel_cache = 1;
+    cfg->entry_timeout = 120;
+    cfg->negative_timeout = 120;
+    */
+   // even 4.18 does not like this so 5.4 is not enough so 
+    if (kernel_version < blobfuse_constants::minKernelVersion) {
+        conn->max_write = 4194304;
+	// let fuselib pick 128KB
+	//conn->max_read = 4194304;
+    } else {
+        conn->want |= FUSE_CAP_BIG_WRITES;
+    }
+    conn->max_readahead = 4194304;
+    conn->max_background = 128;
+    //  conn->want |= FUSE_CAP_WRITEBACK_CACHE | FUSE_CAP_EXPORT_SUPPORT; // TODO: Investigate putting this back in when we downgrade to fuse 2.9
+
+    if (!config_options.useGen1) {
+        validate_storage();
     }
 
     return NULL;
@@ -654,10 +666,14 @@ void sig_usr_handler(int signum)
     }
 }
 
-void set_up_callbacks(struct fuse_operations &azs_blob_operations)
+void setup_essentials()
 {
     openlog(log_ident.c_str(), LOG_NDELAY | LOG_PID, 0);
+    signal(SIGUSR1, sig_usr_handler);
+}
 
+void set_up_std_callbacks(struct fuse_operations &azs_blob_operations)
+{
     // Here, we set up all the callbacks that FUSE requires.
     azs_blob_operations.init = azs_init;
     azs_blob_operations.getattr = azs_getattr;
@@ -689,8 +705,17 @@ void set_up_callbacks(struct fuse_operations &azs_blob_operations)
     azs_blob_operations.listxattr = azs_listxattr;
     azs_blob_operations.removexattr = azs_removexattr;
     azs_blob_operations.flush = azs_flush;
+}
 
-    signal(SIGUSR1, sig_usr_handler);
+void set_up_callbacks(struct fuse_operations &azs_blob_operations)
+{
+    if (!config_options.useGen1) {
+        // Use standard fuse callbacks
+        set_up_std_callbacks(azs_blob_operations);
+    } else {
+        // Use gen1 overriding callbacks
+        set_up_broker_callbacks(azs_blob_operations);
+    }
 }
 
 /*
@@ -1205,6 +1230,16 @@ read_and_set_arguments(int argc, char *argv[], struct fuse_args *args)
         config_options.blockSize = uint64_t((config_options.blockSize) * 1024 * 1024);
     }
 
+    config_options.useGen1 = false;
+    if(cmd_options.use_gen1 != NULL)
+    {
+        std::string use_gen1_value(cmd_options.use_gen1);
+        if(use_gen1_value == "true")
+        {
+            config_options.useGen1 = true;
+        }
+    }
+
     if (config_options.streaming && !config_options.readOnlyMount) {
         syslog(LOG_ERR, "Read-Streaming is supported only on Readonly Mounts. Use '-o ro' option in mount command");    
         fprintf(stderr, "Read-Streaming is supported only on Readonly Mounts. Use '-o ro' option in mount command");  
@@ -1277,6 +1312,11 @@ void configure_fuse(struct fuse_args *args)
 
 int initialize_blobfuse()
 {
+    if (config_options.useGen1) {
+        syslog(LOG_INFO, "Fuse forwarding is configured, skipping blobfuse init");
+        return 0;
+    }
+
     if(0 != ensure_files_directory_exists_in_cache(prepend_mnt_path_string("/placeholder")))
     {
         syslog(LOG_CRIT, "Unable to start blobfuse.  Failed to create directory on cache directory: %s, errno = %d.\n", prepend_mnt_path_string("/placeholder").c_str(),  errno);
