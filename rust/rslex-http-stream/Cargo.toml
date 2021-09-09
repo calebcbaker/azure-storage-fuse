@@ -1,0 +1,47 @@
+[package]
+name = "rslex-http-stream"
+version = "0.1.0"
+authors = ["Roger (Peng) Yu <rogeryu@microsoft.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rslex-core = { path = "../rslex-core" }
+async-trait = "0.1.42"
+bytes = "1.0.1"
+chrono = "0.4.19"
+futures = "0.3.15"
+http = "0.2.3"
+hyper = { version = "0.14.4", features = ["stream", "http1", "http2"] }
+itertools = "0.10.0"
+lazy_static = "1.4.0"
+log = "0.4.14"
+rand = "0.7.3"
+regex = "1.4.3"
+serde = { version = "1.0.123", features = ["derive"] }
+tokio = { version = "1.2.0", features = ["time", "rt", "rt-multi-thread"] }
+tracing = "0.1.25"
+tracing-sensitive = { path = "../tracing-sensitive" }
+fluent-assertions = { path = "../fluent-assertions", optional = true }
+hyper-rustls = "0.22.1"
+urlencoding = "1.1.1"
+http-body = "0.4.0"
+hyper-proxy = "0.9.1"
+url = "2.2.1"
+thiserror = "1.0.24"
+headers = "0.3.4"
+
+[dev-dependencies]
+rslex-core = { path = "../rslex-core", features=["test_helper"] }
+fluent-assertions = { path = "../fluent-assertions" }
+tokio-test = "0.4.0"
+simple_proxy = "1.3.4"
+portpicker = "0.1.1"
+httptest = "0.15.2"
+serial_test = "*"
+
+[features]
+default = []
+fake_http_client = ["fluent-assertions"]
+component_tests = ["fake_http_client"]

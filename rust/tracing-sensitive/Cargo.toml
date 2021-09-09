@@ -1,0 +1,25 @@
+[package]
+name = "tracing-sensitive"
+version = "0.1.0"
+authors = ["Lucas Pickup <lupickup@microsoft.com>"]
+description = "Sensitive data scrubbing for tracing::Layer"
+
+categories = [
+    "development-tools::debugging",
+    "development-tools::profiling",
+    "scrubbing"
+]
+keywords = ["tracing", "scrub", "sensitive"]
+license = "MIT"
+edition = "2018"
+
+[features]
+layer = ["tracing-subscriber"]
+
+[dependencies]
+tracing = "0.1.25"
+tracing-subscriber = { version = "0.2.16", optional = true }
+
+[dev-dependencies]
+lazy_static = "1.4.0"
+tracing-subscriber = "0.2.16"

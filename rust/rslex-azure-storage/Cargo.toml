@@ -1,0 +1,45 @@
+[package]
+name = "rslex-azure-storage"
+version = "0.1.0"
+authors = ["Roger (Peng) Yu <rogeryu@microsoft.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rslex-core = { path = "../rslex-core" }
+rslex-http-stream = { path = "../rslex-http-stream"}
+async-trait = "0.1.42"
+base64 = "0.13.0"
+chrono = "0.4.19"
+crossbeam-channel = "0.5.0"
+derivative = "2.2.0"
+hmac = "0.10.1"
+http = "0.2.3"
+hyper = { version = "0.14.4", features = ["stream", "http1", "http2"] }
+itertools = "0.10.0"
+lazy_static = "1.4.0"
+log = "0.4.14"
+minidom = "0.12.0"
+regex = "1.4.3"
+serde = { version = "1.0.123", features = ["derive"] }
+serde_json = "1.0.63"
+sha2 = "0.9.3"
+thiserror = "1.0.24"
+tracing = "0.1.25"
+tracing-sensitive = { path = "../tracing-sensitive" }
+uuid = { version = "0.8.2", features = ["v4"] }
+url = "2.2.1"
+urlencoding = "1.1.1"
+
+[dev-dependencies]
+rslex-http-stream = { path = "../rslex-http-stream", features=["fake_http_client"]}
+rslex-core = { path = "../rslex-core", features=["test_helper"] }
+maplit = "1.0.2"
+fluent-assertions = { path = "../fluent-assertions" }
+tokio-test = "0.4.0"
+
+[features]
+default = []
+component_tests = []
+fake_access_token_resolver = []

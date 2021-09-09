@@ -1,0 +1,16 @@
+[package]
+name = "fluent-assertions-derive"
+authors = ["rogeryu <rogeryu@microsoft.com>"]
+description = "Fluent test assertions"
+version = "0.2.0"
+readme = "README.md"
+keywords = ["fluent", "testing", "matchers", "assert", "assertions"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0.9"
+syn = { version = "1.0.60", features = ["extra-traits", "full"] }
+proc-macro2 = "1.0.24"

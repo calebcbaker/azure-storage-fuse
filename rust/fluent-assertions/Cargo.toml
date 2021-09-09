@@ -1,0 +1,14 @@
+[package]
+name = "fluent-assertions"
+authors = ["rogeryu <rogeryu@microsoft.com>"]
+description = "Fluent test assertions"
+version = "0.2.0"
+readme = "README.md"
+keywords = ["fluent", "testing", "matchers", "assert", "assertions"]
+edition = "2018"
+
+[dependencies]
+num = "0.3.1"
+log = "0.4.14"
+regex = "1.4.3"
+fluent-assertions-derive = { path = "../fluent-assertions-derive" }
