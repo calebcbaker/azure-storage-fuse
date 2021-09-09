@@ -1,0 +1,1 @@
+cargo_build(NAME datasetfuse_bindings)

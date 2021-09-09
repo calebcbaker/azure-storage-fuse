@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <fuse.h>
+#include <datasetfuse_bindings.h>
 
 void set_up_broker_callbacks(struct fuse_operations &azs_blob_operations)
 {
@@ -15,11 +16,11 @@ void set_up_broker_callbacks(struct fuse_operations &azs_blob_operations)
     azs_blob_operations.getattr = azs_getattr;
     azs_blob_operations.statfs = azs_statfs;
     azs_blob_operations.access = azs_access;
-    azs_blob_operations.readlink = azs_readlink;
-    azs_blob_operations.symlink = azs_symlink;
+    azs_blob_operations.readlink = azs_rust_readlink;
+    azs_blob_operations.symlink = azs_rust_symlink;
     azs_blob_operations.readdir = azs_readdir;
-    azs_blob_operations.open = azs_open;
-    azs_blob_operations.read = azs_read;
+    azs_blob_operations.open = azs_rust_open;
+    azs_blob_operations.read = azs_rust_read;
     azs_blob_operations.release = azs_release;
     azs_blob_operations.fsync = azs_fsync;
     azs_blob_operations.fsyncdir = azs_fsyncdir;

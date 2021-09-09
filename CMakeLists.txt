@@ -33,6 +33,7 @@ set (BLOBFUSE_HEADER
   blobfuse/include/OAuthTokenCredentialManager.h
 
   fuse_forwarder/forwarder.h
+  fuse_forwarder/datasetfuse_bindings/include/datasetfuse_bindings.h
 )
 
 set (BLOBFUSE_SOURCE
@@ -89,6 +90,8 @@ if(UNIX)
   # set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost COMPONENTS filesystem system REQUIRED)
   find_package(Boost COMPONENTS thread REQUIRED)
+  find_library(DS_BINDINGS datasetfuse_bindings)
+
   add_definitions(-std=c++11)
   add_definitions(-D_FILE_OFFSET_BITS=64)
  # set(WARNING "-Wall -Wextra -Werror -pedantic -pedantic-errors")
@@ -96,7 +99,7 @@ if(UNIX)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_THREAD_LIBS_INIT} ${WARNING} ${CMAKE_CXX_FLAGS}")
 
-  include_directories(${CMAKE_SOURCE_DIR}/blobfuse ${CMAKE_SOURCE_DIR}/blobfuse/include ${CMAKE_SOURCE_DIR}/fuse_forwarder ${CMAKE_SOURCE_DIR}/cpplite/include ${CMAKE_SOURCE_DIR}/cpplite/adls/include ${CURL_INCLUDE_DIRS} ${GNUTLS_INCLUDE_DIR} ${Boost_INCLUDE_DIR} nlohmann-json)
+  include_directories(${CMAKE_SOURCE_DIR}/blobfuse ${CMAKE_SOURCE_DIR}/blobfuse/include ${CMAKE_SOURCE_DIR}/fuse_forwarder ${CMAKE_SOURCE_DIR}/fuse_forwarder/datasetfuse_bindings/include ${CMAKE_SOURCE_DIR}/cpplite/include ${CMAKE_SOURCE_DIR}/cpplite/adls/include ${CURL_INCLUDE_DIRS} ${GNUTLS_INCLUDE_DIR} ${Boost_INCLUDE_DIR} nlohmann-json)
   set(CMAKE_MACOSX_RPATH ON)
   pkg_search_module(UUID REQUIRED uuid)
   
@@ -105,9 +108,9 @@ if(UNIX)
   add_executable(blobfuse ${BLOBFUSE_HEADER} ${BLOBFUSE_SOURCE} blobfuse/main.cpp)
 
   if(INCLUDE_EXTRALIB)
-    target_link_libraries(blobfuse azure-storage-adls azure-storage-lite ${CURL_LIBRARIES} ${GNUTLS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${UUID_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} fuse gcrypt stdc++ m dl)
+    target_link_libraries(blobfuse azure-storage-adls azure-storage-lite ${CURL_LIBRARIES} ${GNUTLS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${UUID_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} fuse gcrypt stdc++ m dl "${DS_BINDINGS}")
   else()
-    target_link_libraries(blobfuse azure-storage-adls azure-storage-lite ${CURL_LIBRARIES} ${GNUTLS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${UUID_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} fuse gcrypt)
+    target_link_libraries(blobfuse azure-storage-adls azure-storage-lite ${CURL_LIBRARIES} ${GNUTLS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${UUID_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} fuse gcrypt "${DS_BINDINGS}")
   endif()
   install(TARGETS blobfuse
     PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE

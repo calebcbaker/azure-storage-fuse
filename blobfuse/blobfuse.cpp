@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <pwd.h>
 #include <forwarder.h>
+#include <datasetfuse_bindings.h>
 
 #include <include/StorageBfsClientBase.h>
 #include <include/BlockBlobBfsClient.h>

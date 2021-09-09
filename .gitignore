@@ -68,3 +68,5 @@ connection.cfg
 tools/blobcp
 connection.cfg
 stresstests/blobfusestress
+
+target/
